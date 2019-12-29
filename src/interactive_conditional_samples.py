@@ -8,6 +8,11 @@ import tensorflow as tf
 
 import model, sample, encoder
 
+
+
+
+
+
 def interact_model(
     model_name='124M',
     seed=None,
@@ -18,6 +23,7 @@ def interact_model(
     top_k=0,
     top_p=1,
     models_dir='models',
+	data
 ):
     """
     Interactively run the model
@@ -70,7 +76,7 @@ def interact_model(
         saver.restore(sess, ckpt)
 
         while True:
-            raw_text = input("Model prompt >>> ")
+            raw_text = data #input("Model prompt >>> ")
             while not raw_text:
                 print('Prompt should not be empty!')
                 raw_text = input("Model prompt >>> ")
@@ -85,8 +91,20 @@ def interact_model(
                     text = enc.decode(out[i])
                     print("=" * 40 + " SAMPLE " + str(generated) + " " + "=" * 40)
                     print(text)
+					return text
             print("=" * 80)
 
+def webapp():
+	app = Flask(__name__)
+	run_with_ngrok(app)   #starts ngrok when the app is run
+	@app.route('/', methods=['GET'])
+	def index():
+		if request.method == 'GET':
+			data = request.args.get('text')
+			return "" + interact_model(data)
+	
+	app.run()
+
 if __name__ == '__main__':
-    fire.Fire(interact_model)
+    fire.Fire(webapp)
 
